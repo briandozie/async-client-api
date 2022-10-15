@@ -5,4 +5,24 @@
     @using WebServer.Models;
     @model IEnumerable<Client>;
 }
-<h1>test</h1>
+
+<h1>List of Clients</h1>
+<div id="tableview">
+    <table class="center">
+        <tr>
+            <th>Client ID</th>
+            <th>IP Address</th>
+            <th>Port Number</th>
+            <th>Jobs Completed</th>
+        </tr>
+        @foreach (var client in Model)
+        {
+            <tr>
+                <td>@client.Id</td>
+                <td>@client.IPAddress</td>
+                <td>@client.PortNumber</td>
+                <td>@client.CompletedJobs</td>
+            </tr>
+        }
+    </table>
+</div>
