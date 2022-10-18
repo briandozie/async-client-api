@@ -18,6 +18,10 @@ using RestSharp;
 using Newtonsoft.Json;
 using IronPython;
 using WebServer.Models;
+using RemoteServer;
+using System.ServiceModel;
+using System.Net.Sockets;
+using System.Net;
 
 namespace ClientGUI
 {
@@ -26,10 +30,52 @@ namespace ClientGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private RemoteServerInterface foob;
         public MainWindow()
         {
-            
             InitializeComponent();
+
+            //connect to remote server
+            ChannelFactory<RemoteServerInterface> foobFactory;
+            NetTcpBinding tcp = new NetTcpBinding();
+            //Set the URL and create the connection!
+            string URL = "net.tcp://localhost:8100/JobService";
+            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
+            foob = foobFactory.CreateChannel();
+
+            addClient();
+        }
+
+        private void addClient()
+        {
+            Random rand = new Random();
+            Client client = new Client();
+            client.Id = rand.Next(99999999);
+            client.IPAddress = getIPAdd();
+            client.PortNumber = "8200";
+            client.CompletedJobs = 0;
+
+
+            RestClient restClient = new RestClient("http://localhost:50968/");
+            RestRequest restRequest = new RestRequest("api/Clients", Method.Post);
+            restRequest.AddJsonBody(JsonConvert.SerializeObject(client));
+            RestResponse restResponse = restClient.Post(restRequest);
+        }
+
+        private string getIPAdd()
+        {
+            IPAddress[] hostAddresses = Dns.GetHostAddresses("");
+            string ipAdd ="";
+            foreach (IPAddress hostAddress in hostAddresses)
+            {
+                if (hostAddress.AddressFamily == AddressFamily.InterNetwork &&
+                    !IPAddress.IsLoopback(hostAddress) &&  // ignore loopback addresses
+                    !hostAddress.ToString().StartsWith("169.254."))  // ignore link-local addresses
+                    ipAdd = hostAddress.ToString();
+            }
+            txtIP.Text = ipAdd;
+            return ipAdd;
+
         }
 
         private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
@@ -42,13 +88,14 @@ namespace ClientGUI
 
         private void btnPost_Click(object sender, RoutedEventArgs e)
         {
-            
+            foob.Upload(txtInput.Text);
+            MessageBox.Show("Job Uploaded.");
         }
 
         private void getClients()
         {
             RestClient restClient = new RestClient("http://localhost:50968/");
-            RestRequest restRequest = new RestRequest("api/Clients");
+            RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
             RestResponse restResponse = restClient.Post(restRequest);
             List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
         }
