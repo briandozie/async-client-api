@@ -31,6 +31,9 @@ namespace ClientGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private string ipadd, portNum;
+
+        private RemoteServerInterface foob;
         public MainWindow()
         {
             InitializeComponent();
@@ -41,13 +44,7 @@ namespace ClientGUI
             //Add Client
             addClient(ipadd, portNum);
 
-            //connect to remote server
-            ChannelFactory<RemoteServerInterface> foobFactory;
-            NetTcpBinding tcp = new NetTcpBinding();
-            //Set the URL and create the connection!
-            
-            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
-            foob = foobFactory.CreateChannel();
+            InitializeServer();
         }
 
         public string getURL()
@@ -146,11 +143,12 @@ namespace ClientGUI
             RemoteServerImpl jobServer = new RemoteServerImpl();
 
             host = new ServiceHost(jobServer);
-            host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ip, portNum));
+            host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum));
             host.Open();
 
-            NetTcpBinding tcp = new NetTcpBinding();
-            string URL = String.Format("net.tcp://{0}:{1}/JobService", ip, portNum);
+            string URL = String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum);
+
+            ChannelFactory<RemoteServerInterface> foobFactory;
             foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
             foob = foobFactory.CreateChannel();
 
