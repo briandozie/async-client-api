@@ -22,6 +22,7 @@ using RemoteServer;
 using System.ServiceModel;
 using System.Net.Sockets;
 using System.Net;
+using System.Security.Policy;
 
 namespace ClientGUI
 {
@@ -31,28 +32,51 @@ namespace ClientGUI
     public partial class MainWindow : Window
     {
         private RemoteServerInterface foob;
+        private string ipadd, portNum;
         public MainWindow()
         {
             InitializeComponent();
+
+            //get IP Address and Port Number
+            string URL = getURL();
+
+            //Add Client
+            addClient(ipadd, portNum);
 
             //connect to remote server
             ChannelFactory<RemoteServerInterface> foobFactory;
             NetTcpBinding tcp = new NetTcpBinding();
             //Set the URL and create the connection!
-            string URL = "net.tcp://localhost:8100/JobService";
+            
             foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
             foob = foobFactory.CreateChannel();
-
-            addClient();
         }
 
-        private void addClient()
+        public string getURL()
+        {
+            IPAddDialog dialog = new IPAddDialog();
+            ipadd = "";
+            portNum = "";
+            string url = "";
+            if (dialog.ShowDialog() == true)
+            {
+                ipadd = dialog.IPAddress;
+                portNum = dialog.PortNumber;
+            }
+
+            url = "net.tcp://" + ipadd + ":" + portNum + "/JobService";
+
+            txtIP.Text = url;
+            return url;
+        }
+
+        private Client addClient(string ipAdd, string portNum)
         {
             Random rand = new Random();
             Client client = new Client();
             client.Id = rand.Next(99999999);
-            client.IPAddress = getIPAdd();
-            client.PortNumber = "8200";
+            client.IPAddress = ipAdd;
+            client.PortNumber = portNum;
             client.CompletedJobs = 0;
 
 
@@ -60,9 +84,11 @@ namespace ClientGUI
             RestRequest restRequest = new RestRequest("api/Clients", Method.Post);
             restRequest.AddJsonBody(JsonConvert.SerializeObject(client));
             RestResponse restResponse = restClient.Post(restRequest);
+
+            return client;
         }
 
-        private string getIPAdd()
+     /*   private string getIPAdd()
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses("");
             string ipAdd ="";
@@ -77,7 +103,7 @@ namespace ClientGUI
             return ipAdd;
 
         }
-
+*/
         private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -92,12 +118,19 @@ namespace ClientGUI
             MessageBox.Show("Job Uploaded.");
         }
 
+        private void retrieveJob()
+        {
+
+        }
+
         private void getClients()
         {
             RestClient restClient = new RestClient("http://localhost:50968/");
             RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
             RestResponse restResponse = restClient.Post(restRequest);
             List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
+
+
         }
        
     }
