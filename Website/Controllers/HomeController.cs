@@ -22,5 +22,17 @@ namespace Website.Controllers
 
             return View(clients);
         }
+
+        /*
+         IPAddress[] hostAddresses = Dns.GetHostAddresses("");
+
+                foreach (IPAddress hostAddress in hostAddresses)
+                {
+                if (hostAddress.AddressFamily == AddressFamily.InterNetwork &&
+                    !IPAddress.IsLoopback(hostAddress) &&  // ignore loopback addresses
+                    !hostAddress.ToString().StartsWith("169.254."))  // ignore link-local addresses
+                    Console.WriteLine(hostAddress);
+                }
+         */
     }
 }
