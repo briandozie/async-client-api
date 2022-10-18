@@ -14,6 +14,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using RestSharp;
+using Newtonsoft.Json;
+using IronPython;
+using WebServer.Models;
 
 namespace ClientGUI
 {
@@ -40,5 +44,14 @@ namespace ClientGUI
         {
 
         }
+
+        private void getClients()
+        {
+            RestClient restClient = new RestClient("http://localhost:50968/");
+            RestRequest restRequest = new RestRequest("api/Clients");
+            RestResponse restResponse = restClient.Post(restRequest);
+            List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
+        }
+       
     }
 }

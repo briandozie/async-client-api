@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="248" Height="90" Margin="0,226,0,0"/>
+        <TextBox x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="448" Height="163" Margin="0,153,0,0" TextChanged="txtInput_TextChanged"/>
         <Button x:Name="btnSubmit" Content="Submit" HorizontalAlignment="Center" Margin="0,352,0,0" VerticalAlignment="Top" Height="31" Width="96" Click="btnSubmit_Click"/>
-        <Button x:Name="btnBrowseFile" Content="Browse" Margin="545,227,209,176" Click="btnBrowseFile_Click"/>
+        <Button x:Name="btnBrowseFile" Content="Browse" Margin="629,153,105,250" Click="btnBrowseFile_Click"/>
 
     </Grid>
 </Window>
