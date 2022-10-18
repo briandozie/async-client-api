@@ -40,9 +40,9 @@ namespace ClientGUI
                 txtInput.Text = File.ReadAllText(openFileDialog.FileName);
         }
 
-        private void btnSubmit_Click(object sender, RoutedEventArgs e)
+        private void btnPost_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
 
         private void getClients()
