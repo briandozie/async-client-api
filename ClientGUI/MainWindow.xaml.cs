@@ -18,6 +18,8 @@ using RestSharp;
 using Newtonsoft.Json;
 using IronPython;
 using WebServer.Models;
+using RemoteServer;
+using System.ServiceModel;
 
 namespace ClientGUI
 {
@@ -26,6 +28,9 @@ namespace ClientGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        RemoteServerInterface foob;
+        ChannelFactory<RemoteServerInterface> foobFactory;
+
         public MainWindow()
         {
             
@@ -52,6 +57,32 @@ namespace ClientGUI
             RestResponse restResponse = restClient.Post(restRequest);
             List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
         }
-       
+
+
+        private async void StartServerThread(object sender, RoutedEventArgs e)
+        {
+            Task task = new Task(InitializeServer);
+            task.Start();
+            await task;
+        }
+
+        private void InitializeServer()
+        {
+            ServiceHost host;
+            NetTcpBinding tcp = new NetTcpBinding();
+            RemoteServerImpl jobServer = new RemoteServerImpl();
+
+            host = new ServiceHost(jobServer);
+            host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ip, portNum));
+            host.Open();
+
+            NetTcpBinding tcp = new NetTcpBinding();
+            string URL = String.Format("net.tcp://{0}:{1}/JobService", ip, portNum);
+            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
+            foob = foobFactory.CreateChannel();
+
+            Console.ReadLine();
+            host.Close();
+        }
     }
 }

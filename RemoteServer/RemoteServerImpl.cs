@@ -9,7 +9,7 @@ namespace RemoteServer
 {
     [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false,
         InstanceContextMode = InstanceContextMode.Single)]
-    internal class RemoteServerImpl : RemoteServerInterface
+    public class RemoteServerImpl : RemoteServerInterface
     {
         private List<string> jobs;
 
