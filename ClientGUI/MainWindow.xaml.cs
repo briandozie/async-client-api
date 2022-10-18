@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +24,21 @@ namespace ClientGUI
     {
         public MainWindow()
         {
+            
             InitializeComponent();
+        }
+
+        private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+                txtInput.Text = File.ReadAllText(openFileDialog.FileName);
+        }
+
+        private void btnSubmit_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
