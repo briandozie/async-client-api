@@ -53,6 +53,7 @@ namespace ClientGUI
             //Add Client
             addClient(ipadd, portNum);
 
+            CreateVirtualIP();
             StartServerThread();
             StartNetworkingThread();
         }
@@ -70,8 +71,8 @@ namespace ClientGUI
             string url = "";
             if (dialog.ShowDialog() == true)
             {
-                //ipadd = dialog.IPAddress;
-                ipadd = getIPAdd();
+                ipadd = dialog.IPAddress;
+                //ipadd = getIPAdd();
                 portNum = dialog.PortNumber;
             }
 
@@ -81,9 +82,13 @@ namespace ClientGUI
             return url;
         }
 
+        private void CreateVirtualIP()
+        {
+            
+        }
+
         private Client addClient(string ipAdd, string portNum)
         {
-            Random rand = new Random();
             Client client = new Client();
             client.IPAddress = ipAdd;
             client.PortNumber = portNum;
@@ -273,12 +278,23 @@ namespace ClientGUI
 
         private RemoteServerInterface connectToRemoteServer(string ip, string port)
         {
-            NetTcpBinding tcp = new NetTcpBinding();
-            string URL = String.Format("net.tcp://{0}:{1}/JobService", ip, port);
+            RemoteServerInterface remoteFoob;
 
-            ChannelFactory<RemoteServerInterface> foobFactory;
-            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
-            RemoteServerInterface remoteFoob = foobFactory.CreateChannel();
+
+
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+            {
+                socket.Connect(ip, Int32.Parse(port));
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                string localIP = endPoint.Address.ToString();
+
+                NetTcpBinding tcp = new NetTcpBinding();
+                string URL = String.Format("net.tcp://{0}:{1}/JobService", localIP, port);
+
+                ChannelFactory<RemoteServerInterface> foobFactory;
+                foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
+                remoteFoob = foobFactory.CreateChannel();
+            }
 
             return remoteFoob;
         }
@@ -297,17 +313,23 @@ namespace ClientGUI
             NetTcpBinding tcp = new NetTcpBinding();
             RemoteServerImpl jobServer = new RemoteServerImpl();
 
-            host = new ServiceHost(jobServer);
-            //host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum));
-            host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum));
-            host.Open();
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+            {
+                socket.Connect(ipadd, Int32.Parse(portNum));
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                string localIP = endPoint.Address.ToString();
 
-            //string URL = String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum);
-            string URL = String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum);
+                host = new ServiceHost(jobServer);
+                host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", localIP, portNum));
+                host.Open();
 
-            ChannelFactory<RemoteServerInterface> foobFactory;
-            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
-            foob = foobFactory.CreateChannel();
+                string URL = String.Format("net.tcp://{0}:{1}/JobService", localIP, portNum);
+
+                ChannelFactory<RemoteServerInterface> foobFactory;
+                foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
+                foob = foobFactory.CreateChannel();
+            }
+            
 
             //Console.ReadLine();
             //host.Close();
