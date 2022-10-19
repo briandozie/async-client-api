@@ -41,7 +41,7 @@ namespace ClientGUI
         private string ipadd, portNum;
         private int id;
         private RemoteServerInterface foob;
-        private Client client;
+        private Client client, jobPoster;
 
         public MainWindow()
         {
@@ -73,7 +73,6 @@ namespace ClientGUI
             if (dialog.ShowDialog() == true)
             {
                 ipadd = dialog.IPAddress;
-                //ipadd = getIPAdd();
                 portNum = dialog.PortNumber;
             }
 
@@ -102,7 +101,7 @@ namespace ClientGUI
             Client returnClient = JsonConvert.DeserializeObject<Client>(restResponse.Content);
             id = returnClient.Id;
 
-            return client;
+            return returnClient;
         }
 
         private void removeClient()
@@ -113,6 +112,33 @@ namespace ClientGUI
             client.Execute(request);
         }
 
+        private void editClient()
+        {
+            Client newClient = new Client();
+            newClient.Id = client.Id;
+            newClient.IPAddress = client.IPAddress;
+            newClient.PortNumber = client.PortNumber;
+            newClient.CompletedJobs = client.CompletedJobs + 1;
+
+            client = newClient;
+            RestClient restClient = new RestClient("http://localhost:50968/");
+            RestRequest restRequest = new RestRequest("api/Clients/{id}", Method.Put);
+            restRequest.AddUrlSegment("id", id);
+            restRequest.AddJsonBody(newClient);
+            RestResponse restResponse = restClient.Execute(restRequest);
+
+        }
+        private List<Client> getClients()
+        {
+            RestClient restClient = new RestClient("http://localhost:50968/");
+            RestRequest restRequest = new RestRequest("api/clients", Method.Get);
+            RestResponse restResponse = restClient.Execute(restRequest);
+            List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
+
+            return clients;
+        }
+
+        //TODO: This can be removed?
         private string getIPAdd()
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses("");
@@ -158,33 +184,7 @@ namespace ClientGUI
             while (!foob.Upload(job));
             MessageBox.Show("Job Uploaded.");
         }
-        private void editClient()
-        {
-            Client newClient = new Client();
-            newClient.Id = client.Id;
-            newClient.IPAddress = client.IPAddress;
-            newClient.PortNumber = client.PortNumber;
-            newClient.CompletedJobs = client.CompletedJobs + 1;
-
-            client = newClient;
-            RestClient restClient = new RestClient("http://localhost:50968/");
-            RestRequest restRequest = new RestRequest("api/Clients/{id}", Method.Put);
-            restRequest.AddUrlSegment("id", id);
-            restRequest.AddJsonBody(newClient);
-            RestResponse restResponse = restClient.Execute(restRequest);
-           
-        }
-
-        private List<Client> getClients()
-        {
-            RestClient restClient = new RestClient("http://localhost:50968/");
-            RestRequest restRequest = new RestRequest("api/clients", Method.Get);
-            RestResponse restResponse = restClient.Execute(restRequest);
-            List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
-
-            return clients;
-        }
-
+      
         private async void StartNetworkingThread()
         {
             var progress = new Progress<bool>(value =>
@@ -277,24 +277,6 @@ namespace ClientGUI
                 ScriptScope scope = engine.CreateScope();
                 var result = engine.Execute(job, scope);
 
-                // TODO: post answer back to client ? idk
-
-                /*
-                // TODO: still need to test if this works
-                using(var reader = new StringReader(job))
-                {
-                    // read first line of job string
-                    string line = reader.ReadLine();
-
-                    // get function name
-                    int from = job.IndexOf("def") + "def".Length;
-                    int to = job.LastIndexOf("(");
-
-                    string funcName = job.Substring(from, to - from);
-                    return funcName;
-                }*/
-             
-                //TODO: Send back to web server
                 return Convert.ToString(result);
             }
             catch (Exception)
