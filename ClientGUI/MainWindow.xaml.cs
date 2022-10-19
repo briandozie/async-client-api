@@ -41,6 +41,7 @@ namespace ClientGUI
         private string ipadd, portNum;
         private int id;
         private RemoteServerInterface foob;
+        private Client client;
 
         public MainWindow()
         {
@@ -51,7 +52,7 @@ namespace ClientGUI
             string URL = getURL();
 
             //Add Client
-            addClient(ipadd, portNum);
+            client = addClient(ipadd, portNum);
 
             CreateVirtualIP();
             StartServerThread();
@@ -157,6 +158,22 @@ namespace ClientGUI
             while (!foob.Upload(job));
             MessageBox.Show("Job Uploaded.");
         }
+        private void editClient()
+        {
+            Client newClient = new Client();
+            newClient.Id = client.Id;
+            newClient.IPAddress = client.IPAddress;
+            newClient.PortNumber = client.PortNumber;
+            newClient.CompletedJobs = client.CompletedJobs + 1;
+
+            client = newClient;
+            RestClient restClient = new RestClient("http://localhost:50968/");
+            RestRequest restRequest = new RestRequest("api/Clients/{id}", Method.Put);
+            restRequest.AddUrlSegment("id", id);
+            restRequest.AddJsonBody(newClient);
+            RestResponse restResponse = restClient.Execute(restRequest);
+           
+        }
 
         private List<Client> getClients()
         {
@@ -183,7 +200,8 @@ namespace ClientGUI
                     progBar.Value = 100;
                 }
                 progBar.IsIndeterminate = value;
-                txtStatus.Text = status;    
+                txtStatus.Text = status;
+                txtCompletedJob.Text = String.Format("Completed Jobs: {0}", client.CompletedJobs);
             });
 
             var result = new Progress<string>(value =>
@@ -236,6 +254,7 @@ namespace ClientGUI
                                         string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
                                         result.Report(ExecuteJob(jobString)); // execute job
+                                        editClient();
                                         progress.Report(false);
                                     }
                                 }
@@ -248,7 +267,7 @@ namespace ClientGUI
             }
         }
 
-
+        
 
         private string ExecuteJob(string job)
         {
@@ -274,7 +293,8 @@ namespace ClientGUI
                     string funcName = job.Substring(from, to - from);
                     return funcName;
                 }*/
-                //TODO: need to convert result to string
+             
+                //TODO: Send back to web server
                 return Convert.ToString(result);
             }
             catch (Exception)
