@@ -23,7 +23,8 @@
         </StackPanel>
 
         <StackPanel x:Name="GetJobPanel" Margin="0,20,0,0">
-            <TextBlock Text="Retrieve Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,0,0,10"/>
+            <TextBlock Text="Retrieve Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20"/>
+            <TextBlock x:Name="txtCompletedJob" Text="Completed Job: 0" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,0,0,10"/>
             <ProgressBar x:Name="progBar" Height="27" Width="388"/>
             <TextBlock x:Name="txtStatus" Text="Searching Job..." HorizontalAlignment="Center"/>
             <TextBlock Text="Result: " HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Width="450" />
