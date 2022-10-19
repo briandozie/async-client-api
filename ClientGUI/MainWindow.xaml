@@ -12,7 +12,7 @@
             <TextBox x:Name="txtIP" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ip Address"/>
             <TextBlock Text="Post Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,0,0,10" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,0,0,0">
-                <TextBox x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" Height="200" AcceptsReturn="True"/>
+                <TextBox x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" Height="200" AcceptsReturn="True" AcceptsTab="True"/>
                 <Button x:Name="btnBrowseFile" Content="Browse" Click="btnBrowseFile_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,0,0,0"/>
             </StackPanel>
 

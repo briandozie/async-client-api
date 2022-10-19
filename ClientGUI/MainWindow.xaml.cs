@@ -85,11 +85,9 @@ namespace ClientGUI
         {
             Random rand = new Random();
             Client client = new Client();
-            //client.Id = rand.Next(99999999);
             client.IPAddress = ipAdd;
             client.PortNumber = portNum;
             client.CompletedJobs = 0;
-
 
             RestClient restClient = new RestClient("http://localhost:50968/");
             RestRequest restRequest = new RestRequest("api/Clients", Method.Post);
@@ -122,7 +120,6 @@ namespace ClientGUI
             }
             //txtIP.Text = ipAdd;
             return ipAdd;
-
         }
 
         private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
@@ -156,11 +153,6 @@ namespace ClientGUI
             MessageBox.Show("Job Uploaded.");
         }
 
-        private void retrieveJob()
-        {
-        
-        }
-
         private List<Client> getClients()
         {
             RestClient restClient = new RestClient("http://localhost:50968/");
@@ -187,10 +179,17 @@ namespace ClientGUI
                 progBar.IsIndeterminate = value;
                 txtStatus.Text = status;    
             });
-            await Task.Run (()=> InitializeNetwork(progress));
+
+            var result = new Progress<string>(value =>
+            {
+                txtInput.Text = value;
+            });
+
+
+            await Task.Run (()=> InitializeNetwork(progress, result));
         }
 
-        private void InitializeNetwork(IProgress<bool> progress)
+        private void InitializeNetwork(IProgress<bool> progress, IProgress <string> result)
         {
             while(true)
             {
@@ -231,7 +230,7 @@ namespace ClientGUI
                                         byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
                                         string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
-                                        ExecuteJob(jobString); // execute job
+                                        result.Report(ExecuteJob(jobString)); // execute job
                                         progress.Report(false);
                                     }
                                 }
@@ -268,8 +267,8 @@ namespace ClientGUI
                 string funcName = job.Substring(from, to - from);
                 return funcName;
             }*/
-
-            return null;
+            //TODO: need to convert result to string
+            return "success";
         }
 
         private RemoteServerInterface connectToRemoteServer(string ip, string port)
