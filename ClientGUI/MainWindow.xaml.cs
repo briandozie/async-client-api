@@ -155,12 +155,24 @@ namespace ClientGUI
 
         private async void StartNetworkingThread()
         {
-            Task task = new Task(InitializeNetwork);
-            task.Start();
-            await task;
+            var progress = new Progress<bool>(value =>
+            {
+                string status;
+                if (value)
+                {
+                    status = "Downloading and Executing Job...";
+                }
+                else
+                {
+                    status = "Job Successfully Executed.";
+                }
+                progBar.IsIndeterminate = value;
+                txtStatus.Text = status;    
+            });
+            await Task.Run (()=> InitializeNetwork(progress));
         }
 
-        private void InitializeNetwork()
+        private void InitializeNetwork(IProgress<bool> progress)
         {
             while(true)
             {
@@ -180,10 +192,12 @@ namespace ClientGUI
                         // check for available jobs
                         if(remoteFoob.JobAvailable())
                         {
+
                             bool success = false;
 
-                            while(!success)
+                            while (!success)
                             {
+                                progress.Report(true);
                                 Job job = remoteFoob.Download(); // download job
 
                                 using (SHA256 sha256Hash = SHA256.Create())
@@ -200,6 +214,7 @@ namespace ClientGUI
                                         string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
                                         ExecuteJob(jobString); // execute job
+                                        progress.Report(false);
                                     }
                                 }
                             }
@@ -211,11 +226,14 @@ namespace ClientGUI
             }
         }
 
+
+
         private string ExecuteJob(string job)
         {
             ScriptEngine engine = Python.CreateEngine();
             ScriptScope scope = engine.CreateScope();
             var result = engine.Execute(job, scope);
+
             // TODO: post answer back to client ? idk
 
             /*
