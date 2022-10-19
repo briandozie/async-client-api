@@ -1,2 +1,7 @@
 def test_func(var1,var2):
 	return var1 + var2
+
+num1 = 2
+num2 = 3
+
+test_func(num1,num2)
