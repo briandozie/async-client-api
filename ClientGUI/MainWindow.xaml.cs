@@ -204,9 +204,8 @@ namespace ClientGUI
                 foreach(Client client in clients)
                 {
                     // for each client that is not itself
-                    /*if(!client.IPAddress.Equals(ipadd) &&
-                         !client.PortNumber.Equals(portNum))*/
-                    if(!client.PortNumber.Equals(portNum))
+                    if(!client.IPAddress.Equals(ipadd) &&
+                       !client.PortNumber.Equals(portNum))
                     {
                         // connect to the client's remote server
                         RemoteServerInterface remoteFoob = connectToRemoteServer(client.IPAddress, client.PortNumber);
