@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="600" Width="800"
         Closed="MainWindow_Closed">
     <StackPanel Orientation="Vertical">
         <StackPanel x:Name="PostJobPanel" Margin="0,30,0,0">
@@ -25,7 +25,10 @@
         <StackPanel x:Name="GetJobPanel" Margin="0,20,0,0">
             <TextBlock Text="Retrieve Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,0,0,10"/>
             <ProgressBar x:Name="progBar" Height="27" Width="388"/>
-            <TextBlock x:Name="txtStatus" Text="Searching..." HorizontalAlignment="Center"/>
+            <TextBlock x:Name="txtStatus" Text="Searching Job..." HorizontalAlignment="Center"/>
+            <TextBlock Text="Result: " HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Width="450" />
+            <TextBox x:Name="txtResult" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="60"/>
+            
         </StackPanel>
 
     </StackPanel>

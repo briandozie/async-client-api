@@ -180,6 +180,7 @@ namespace ClientGUI
                 else
                 {
                     status = "Job Successfully Executed.";
+                    progBar.Value = 100;
                 }
                 progBar.IsIndeterminate = value;
                 txtStatus.Text = status;    
@@ -187,7 +188,7 @@ namespace ClientGUI
 
             var result = new Progress<string>(value =>
             {
-                txtInput.Text = value;
+                txtResult.Text = value;
             });
 
 
@@ -251,28 +252,36 @@ namespace ClientGUI
 
         private string ExecuteJob(string job)
         {
-            ScriptEngine engine = Python.CreateEngine();
-            ScriptScope scope = engine.CreateScope();
-            var result = engine.Execute(job, scope);
-
-            // TODO: post answer back to client ? idk
-
-            /*
-            // TODO: still need to test if this works
-            using(var reader = new StringReader(job))
+            try
             {
-                // read first line of job string
-                string line = reader.ReadLine();
-                
-                // get function name
-                int from = job.IndexOf("def") + "def".Length;
-                int to = job.LastIndexOf("(");
+                ScriptEngine engine = Python.CreateEngine();
+                ScriptScope scope = engine.CreateScope();
+                var result = engine.Execute(job, scope);
 
-                string funcName = job.Substring(from, to - from);
-                return funcName;
-            }*/
-            //TODO: need to convert result to string
-            return "success";
+                // TODO: post answer back to client ? idk
+
+                /*
+                // TODO: still need to test if this works
+                using(var reader = new StringReader(job))
+                {
+                    // read first line of job string
+                    string line = reader.ReadLine();
+
+                    // get function name
+                    int from = job.IndexOf("def") + "def".Length;
+                    int to = job.LastIndexOf("(");
+
+                    string funcName = job.Substring(from, to - from);
+                    return funcName;
+                }*/
+                //TODO: need to convert result to string
+                return Convert.ToString(result);
+            }
+            catch (Exception)
+            {
+                return "Invalid Code";
+            }
+            
         }
 
         private RemoteServerInterface connectToRemoteServer(string ip, string port)
