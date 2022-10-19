@@ -135,12 +135,24 @@ namespace ClientGUI
 
         private async void StartNetworkingThread()
         {
-            Task task = new Task(InitializeNetwork);
-            task.Start();
-            await task;
+            var progress = new Progress<bool>(value =>
+            {
+                string status;
+                if (value)
+                {
+                    status = "Downloading and Executing Job...";
+                }
+                else
+                {
+                    status = "Job Successfully Executed.";
+                }
+                progBar.IsIndeterminate = value;
+                txtStatus.Text = status;    
+            });
+            await Task.Run (()=> InitializeNetwork(progress));
         }
 
-        private void InitializeNetwork()
+        private void InitializeNetwork(IProgress<bool> progress)
         {
             while(true)
             {
@@ -160,8 +172,13 @@ namespace ClientGUI
                         // check for available jobs
                         if(remoteFoob.JobAvailable())
                         {
+                            // updateStatus(true, "Downloading Job...");
+                            progress.Report(true);
                             string job = remoteFoob.Download(); // download job
+                          //  updateStatus(true, "Executing Job...");
                             ExecuteJob(job);
+                            progress.Report(false);
+                          //  updateStatus(false, "Done Exeuting.");
 
                         }
                     }
@@ -171,11 +188,14 @@ namespace ClientGUI
             }
         }
 
+
+
         private string ExecuteJob(string job)
         {
             ScriptEngine engine = Python.CreateEngine();
             ScriptScope scope = engine.CreateScope();
             var result = engine.Execute(job, scope);
+
             // TODO: post answer back to client ? idk
 
             /*
@@ -203,7 +223,7 @@ namespace ClientGUI
 
             ChannelFactory<RemoteServerInterface> foobFactory;
             foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
-            foob = foobFactory.CreateChannel();
+            RemoteServerInterface foob = foobFactory.CreateChannel();
 
             return foob;
         }
