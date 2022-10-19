@@ -23,6 +23,9 @@ using System.ServiceModel;
 using System.Net.Sockets;
 using System.Net;
 using System.Security.Policy;
+using Microsoft.Scripting.Hosting;
+using IronPython.Hosting;
+using System.Threading;
 
 namespace ClientGUI
 {
@@ -32,8 +35,8 @@ namespace ClientGUI
     public partial class MainWindow : Window
     {
         private string ipadd, portNum;
-
         private RemoteServerInterface foob;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -44,7 +47,8 @@ namespace ClientGUI
             //Add Client
             addClient(ipadd, portNum);
 
-            InitializeServer();
+            StartServerThread();
+            StartNetworkingThread();
         }
 
         public string getURL()
@@ -55,7 +59,8 @@ namespace ClientGUI
             string url = "";
             if (dialog.ShowDialog() == true)
             {
-                ipadd = dialog.IPAddress;
+                //ipadd = dialog.IPAddress;
+                ipadd = getIPAdd();
                 portNum = dialog.PortNumber;
             }
 
@@ -83,7 +88,7 @@ namespace ClientGUI
             return client;
         }
 
-     /*   private string getIPAdd()
+        private string getIPAdd()
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses("");
             string ipAdd ="";
@@ -94,11 +99,11 @@ namespace ClientGUI
                     !hostAddress.ToString().StartsWith("169.254."))  // ignore link-local addresses
                     ipAdd = hostAddress.ToString();
             }
-            txtIP.Text = ipAdd;
+            //txtIP.Text = ipAdd;
             return ipAdd;
 
         }
-*/
+
         private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -115,21 +120,90 @@ namespace ClientGUI
 
         private void retrieveJob()
         {
-
+            
         }
 
-        private void getClients()
+        private List<Client> getClients()
         {
             RestClient restClient = new RestClient("http://localhost:50968/");
-            RestRequest restRequest = new RestRequest("api/Clients", Method.Get);
-            RestResponse restResponse = restClient.Post(restRequest);
+            RestRequest restRequest = new RestRequest("api/clients", Method.Get);
+            RestResponse restResponse = restClient.Execute(restRequest);
             List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
 
+            return clients;
+        }
 
+        private async void StartNetworkingThread()
+        {
+            Task task = new Task(InitializeNetwork);
+            task.Start();
+            await task;
+        }
+
+        private void InitializeNetwork()
+        {
+            while(true)
+            {
+                // look for new clients
+                List<Client> clients = getClients();
+
+                foreach(Client client in clients)
+                {
+                    // for each client that is not itself
+                    if(!client.IPAddress.Equals(ipadd) &&
+                       !client.PortNumber.Equals(portNum))
+                    {
+                        // connect to the client's remote server
+                        RemoteServerInterface remoteFoob = connectToRemoteServer(client.IPAddress, client.PortNumber);
+                        
+                        // check for available jobs
+                        if(remoteFoob.JobAvailable())
+                        {
+                            string job = remoteFoob.Download(); // download job
+                            ExecuteJob(job);
+                        }
+
+                    }
+                }
+            }
+        }
+
+        private string ExecuteJob(string job)
+        {
+            ScriptEngine engine = Python.CreateEngine();
+            ScriptScope scope = engine.CreateScope();
+            engine.Execute(job, scope);
+            
+            // TODO: still need to test if this works
+            using(var reader = new StringReader(job))
+            {
+                // read first line of job string
+                string line = reader.ReadLine();
+                
+                // get function name
+                int from = job.IndexOf("def") + "def".Length;
+                int to = job.LastIndexOf("(");
+
+                string funcName = job.Substring(from, to - from);
+            }
+
+            return null;
+        }
+
+        private RemoteServerInterface connectToRemoteServer(string ip, string port)
+        {
+            NetTcpBinding tcp = new NetTcpBinding();
+            string URL = String.Format("net.tcp://{0}:{1}/JobService", ip, port);
+
+            ChannelFactory<RemoteServerInterface> foobFactory;
+            foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
+            foob = foobFactory.CreateChannel();
+
+            return foob;
         }
 
 
-        private async void StartServerThread(object sender, RoutedEventArgs e)
+        private async void StartServerThread()
         {
             Task task = new Task(InitializeServer);
             task.Start();
@@ -143,17 +217,19 @@ namespace ClientGUI
             RemoteServerImpl jobServer = new RemoteServerImpl();
 
             host = new ServiceHost(jobServer);
+            //host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum));
             host.AddServiceEndpoint(typeof(RemoteServerInterface), tcp, String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum));
             host.Open();
 
+            //string URL = String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum);
             string URL = String.Format("net.tcp://{0}:{1}/JobService", ipadd, portNum);
 
             ChannelFactory<RemoteServerInterface> foobFactory;
             foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
             foob = foobFactory.CreateChannel();
 
-            Console.ReadLine();
-            host.Close();
+            //Console.ReadLine();
+            //host.Close();
         }
     }
 }
