@@ -224,7 +224,6 @@ namespace ClientGUI
                 Random rand = new Random();
                 clients = clients.OrderBy(_ => rand.Next()).ToList();
 
-                MessageBox.Show("Test");
                 //loop through each client
                 foreach (Client client in clients)
                 {
