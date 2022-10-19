@@ -13,11 +13,11 @@ namespace RemoteServer
     {
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
-        string Download();
+        Job Download();
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
-        void Upload(string job);
+        bool Upload(Job job);
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]

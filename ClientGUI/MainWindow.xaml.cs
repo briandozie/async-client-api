@@ -26,6 +26,9 @@ using System.Security.Policy;
 using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 using System.Threading;
+using System.Buffers.Text;
+using System.Security.Cryptography;
+using static Community.CsharpSqlite.Sqlite3;
 
 namespace ClientGUI
 {
@@ -114,7 +117,24 @@ namespace ClientGUI
 
         private void btnPost_Click(object sender, RoutedEventArgs e)
         {
-            foob.Upload(txtInput.Text);
+            string jobString = txtInput.Text;
+
+            // encode the job
+            byte[] textBytes = System.Text.Encoding.UTF8.GetBytes(jobString);
+            string encodedJob =  Convert.ToBase64String(textBytes);
+
+            Job job = new Job();
+            job.encodedJob = encodedJob;
+            
+            // create a hash
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] hash = sha256Hash.ComputeHash(System.Text.Encoding.UTF8.GetBytes(encodedJob));
+                job.hash = hash;
+            }
+
+            // upload job
+            while (!foob.Upload(job));
             MessageBox.Show("Job Uploaded.");
         }
 
@@ -160,9 +180,29 @@ namespace ClientGUI
                         // check for available jobs
                         if(remoteFoob.JobAvailable())
                         {
-                            string job = remoteFoob.Download(); // download job
-                            ExecuteJob(job);
+                            bool success = false;
 
+                            while(!success)
+                            {
+                                Job job = remoteFoob.Download(); // download job
+
+                                using (SHA256 sha256Hash = SHA256.Create())
+                                {
+                                    byte[] hash = sha256Hash.ComputeHash(
+                                        System.Text.Encoding.UTF8.GetBytes(job.encodedJob));
+
+                                    if (CompareByteArray(hash, job.hash))
+                                    {
+                                        success = true;
+
+                                        // decode job
+                                        byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
+                                        string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
+
+                                        ExecuteJob(jobString); // execute job
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -203,9 +243,9 @@ namespace ClientGUI
 
             ChannelFactory<RemoteServerInterface> foobFactory;
             foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
-            foob = foobFactory.CreateChannel();
+            RemoteServerInterface remoteFoob = foobFactory.CreateChannel();
 
-            return foob;
+            return remoteFoob;
         }
 
 
@@ -236,6 +276,24 @@ namespace ClientGUI
 
             //Console.ReadLine();
             //host.Close();
+        }
+
+        private bool CompareByteArray(byte[] arr1, byte[] arr2)
+        {
+            if (arr1.Length != arr2.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (arr1[i] != arr2[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
