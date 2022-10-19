@@ -74,7 +74,7 @@ namespace ClientGUI
         {
             Random rand = new Random();
             Client client = new Client();
-            client.Id = rand.Next(99999999);
+            //client.Id = rand.Next(99999999);
             client.IPAddress = ipAdd;
             client.PortNumber = portNum;
             client.CompletedJobs = 0;
@@ -82,8 +82,8 @@ namespace ClientGUI
 
             RestClient restClient = new RestClient("http://localhost:50968/");
             RestRequest restRequest = new RestRequest("api/Clients", Method.Post);
-            restRequest.AddJsonBody(JsonConvert.SerializeObject(client));
-            RestResponse restResponse = restClient.Post(restRequest);
+            restRequest.AddJsonBody(client);
+            RestResponse restResponse = restClient.Execute(restRequest);
 
             return client;
         }
@@ -120,7 +120,7 @@ namespace ClientGUI
 
         private void retrieveJob()
         {
-            
+        
         }
 
         private List<Client> getClients()
@@ -172,8 +172,9 @@ namespace ClientGUI
         {
             ScriptEngine engine = Python.CreateEngine();
             ScriptScope scope = engine.CreateScope();
-            engine.Execute(job, scope);
+            var result = engine.Execute(job, scope);
             
+            /*
             // TODO: still need to test if this works
             using(var reader = new StringReader(job))
             {
@@ -185,7 +186,8 @@ namespace ClientGUI
                 int to = job.LastIndexOf("(");
 
                 string funcName = job.Substring(from, to - from);
-            }
+                return funcName;
+            }*/
 
             return null;
         }
