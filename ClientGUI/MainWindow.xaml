@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Closed="MainWindow_Closed">
     <StackPanel Orientation="Vertical">
         <StackPanel x:Name="PostJobPanel" Margin="0,30,0,0">
             <TextBox x:Name="txtIP" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ip Address"/>

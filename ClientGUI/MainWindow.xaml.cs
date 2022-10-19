@@ -29,6 +29,7 @@ using System.Threading;
 using System.Buffers.Text;
 using System.Security.Cryptography;
 using static Community.CsharpSqlite.Sqlite3;
+using System.ComponentModel;
 
 namespace ClientGUI
 {
@@ -38,11 +39,13 @@ namespace ClientGUI
     public partial class MainWindow : Window
     {
         private string ipadd, portNum;
+        private int id;
         private RemoteServerInterface foob;
 
         public MainWindow()
         {
             InitializeComponent();
+            this.Closed += new EventHandler(MainWindow_Closed);
 
             //get IP Address and Port Number
             string URL = getURL();
@@ -52,6 +55,11 @@ namespace ClientGUI
 
             StartServerThread();
             StartNetworkingThread();
+        }
+
+        void MainWindow_Closed(object sender, EventArgs e)
+        {
+            removeClient();
         }
 
         public string getURL()
@@ -87,8 +95,18 @@ namespace ClientGUI
             RestRequest restRequest = new RestRequest("api/Clients", Method.Post);
             restRequest.AddJsonBody(client);
             RestResponse restResponse = restClient.Execute(restRequest);
+            Client returnClient = JsonConvert.DeserializeObject<Client>(restResponse.Content);
+            id = returnClient.Id;
 
             return client;
+        }
+
+        private void removeClient()
+        {
+            RestClient client = new RestClient("http://localhost:50968/");
+            RestRequest request = new RestRequest("api/clients/{id}", Method.Delete);
+            request.AddUrlSegment("id", id);
+            client.Execute(request);
         }
 
         private string getIPAdd()
