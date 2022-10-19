@@ -220,7 +220,13 @@ namespace ClientGUI
                 // look for new clients
                 List<Client> clients = getClients();
 
-                foreach(Client client in clients)
+                //shuffle client list
+                Random rand = new Random();
+                clients = clients.OrderBy(_ => rand.Next()).ToList();
+
+                MessageBox.Show("Test");
+                //loop through each client
+                foreach (Client client in clients)
                 {
                     // for each client that is not itself
                     if(!client.IPAddress.Equals(ipadd) &&
@@ -289,9 +295,7 @@ namespace ClientGUI
         private RemoteServerInterface connectToRemoteServer(string ip, string port)
         {
             RemoteServerInterface remoteFoob;
-
-
-
+ 
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
                 socket.Connect(ip, Int32.Parse(port));
