@@ -150,8 +150,9 @@ namespace ClientGUI
                 foreach(Client client in clients)
                 {
                     // for each client that is not itself
-                    if(!client.IPAddress.Equals(ipadd) &&
-                       !client.PortNumber.Equals(portNum))
+                    /*if(!client.IPAddress.Equals(ipadd) &&
+                         !client.PortNumber.Equals(portNum))*/
+                    if(!client.PortNumber.Equals(portNum))
                     {
                         // connect to the client's remote server
                         RemoteServerInterface remoteFoob = connectToRemoteServer(client.IPAddress, client.PortNumber);
@@ -161,10 +162,12 @@ namespace ClientGUI
                         {
                             string job = remoteFoob.Download(); // download job
                             ExecuteJob(job);
-                        }
 
+                        }
                     }
                 }
+
+                Thread.Sleep(2000);
             }
         }
 
@@ -173,7 +176,8 @@ namespace ClientGUI
             ScriptEngine engine = Python.CreateEngine();
             ScriptScope scope = engine.CreateScope();
             var result = engine.Execute(job, scope);
-            
+            // TODO: post answer back to client ? idk
+
             /*
             // TODO: still need to test if this works
             using(var reader = new StringReader(job))
