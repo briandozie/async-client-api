@@ -8,28 +8,28 @@
         Title="MainWindow" Height="600" Width="800"
         Closed="MainWindow_Closed">
     <StackPanel Orientation="Vertical">
-        <StackPanel x:Name="PostJobPanel" Margin="0,30,0,0">
-            <TextBlock x:Name="txtIP" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Ip Address" Margin="20,0,0,0"/>
-            <TextBlock Text="Post Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,0,0,10" />
+        <StackPanel x:Name="PostJobPanel" Margin="0,10,0,0">
+            <TextBlock x:Name="txtIP" HorizontalAlignment="Left" VerticalAlignment="Center" Text="Local Endpoint: " Margin="20,0,0,20" FontFamily="Tw Cen MT"/>
+            <TextBlock Text="Post Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" Margin="0,0,0,10" FontFamily="Tw Cen MT" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="50,0,0,0">
-                <TextBox x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" Height="200" AcceptsReturn="True" AcceptsTab="True"/>
-                <Button x:Name="btnBrowseFile" Content="Browse" Click="btnBrowseFile_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,0,0,0"/>
+                <TextBox Style="{DynamicResource TextBoxStyle}" x:Name="txtInput" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="450" Height="200" AcceptsReturn="True" AcceptsTab="True"/>
+                <Button Style="{DynamicResource RoundedButtonStyle}" x:Name="btnBrowseFile" Content="Browse" Click="btnBrowseFile_Click" VerticalAlignment="Top" Margin="8,0,0,0" Height="25" Width="50"/>
             </StackPanel>
 
-            <Button x:Name="btnPost" Content="Post" HorizontalAlignment="Center" VerticalAlignment="Top" Height="31" Width="96" Click="btnPost_Click" Margin="0,20,0,0"/>
+            <Button Style="{DynamicResource RoundedButtonStyle}" x:Name="btnPost" Content="Post" HorizontalAlignment="Center" VerticalAlignment="Top" Height="31" Width="96" Click="btnPost_Click" Margin="0,20,0,0"/>
 
 
 
         </StackPanel>
 
         <StackPanel x:Name="GetJobPanel" Margin="0,20,0,0">
-            <TextBlock Text="Retrieve Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20"/>
-            <TextBlock x:Name="txtCompletedJob" Text="Completed Job: 0" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,0,0,10"/>
-            <ProgressBar x:Name="progBar" Height="27" Width="388"/>
-            <TextBlock x:Name="txtStatus" Text="Searching Job..." HorizontalAlignment="Center"/>
-            <TextBlock Text="Result: " HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Width="450" />
-            <TextBox x:Name="txtResult" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="60"/>
-            
+            <TextBlock Text="Retrieve Job Panel" HorizontalAlignment="Center" FontWeight="Bold" FontSize="20" FontFamily="Tw Cen MT"/>
+            <TextBlock x:Name="txtCompletedJob" Text="Completed Job: 0" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,0,0,10" FontFamily="Tw Cen MT"/>
+            <ProgressBar x:Name="progBar" Height="27" Width="388" Foreground="#FFF1E59E" Background="#FF758A75" BorderBrush="White"/>
+            <TextBlock x:Name="txtStatus" Text="Searching Job..." HorizontalAlignment="Center" FontFamily="Tw Cen MT"/>
+            <TextBlock Text="Result: " HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Width="450" FontFamily="Tw Cen MT" />
+            <TextBox Style="{DynamicResource TextBoxStyle}" x:Name="txtResult" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="60"/>
+
         </StackPanel>
 
     </StackPanel>

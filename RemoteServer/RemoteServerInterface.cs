@@ -17,6 +17,10 @@ namespace RemoteServer
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
+        void Remove();
+
+        [OperationContract]
+        [FaultContract(typeof(ServerFault))]
         bool Upload(Job job);
 
         [OperationContract]

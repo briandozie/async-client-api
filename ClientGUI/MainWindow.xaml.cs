@@ -65,7 +65,7 @@ namespace ClientGUI
 
             url = "net.tcp://" + ipadd + ":" + portNum + "/JobService";
 
-            txtIP.Text = "Service Endpoint: " + url;
+            txtIP.Text = "Local Endpoint: " + url;
             return url;
         }
 
@@ -159,7 +159,7 @@ namespace ClientGUI
 
             Job job = new Job();
             job.encodedJob = encodedJob;
-            
+           
             // create a hash
             using (SHA256 sha256Hash = SHA256.Create())
             {
@@ -245,9 +245,15 @@ namespace ClientGUI
                                         byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
                                         string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
-                                        result.Report(ExecuteJob(jobString)); // execute job
+                                        //execute job and update GUI
+                                        string txtResult = ExecuteJob(jobString); // execute job
                                         EditClient();
                                         progress.Report(false);
+
+                                        //post back job and remove job
+                                        result.Report(txtResult);
+                                        remoteFoob.Remove();
+                                        
                                     }
                                 }
                             }
