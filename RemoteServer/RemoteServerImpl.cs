@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RemoteServer
 {
-    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false,
+    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = true,
         InstanceContextMode = InstanceContextMode.Single)]
     public class RemoteServerImpl : RemoteServerInterface
     {

@@ -127,7 +127,7 @@ namespace ClientGUI
             return clients;
         }
 
-        //TODO: This can be removed?
+        //TODO: This can be removed? yes
         private string GetIPAdd()
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses("");
