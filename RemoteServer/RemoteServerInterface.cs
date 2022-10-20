@@ -33,7 +33,7 @@ namespace RemoteServer
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
-        string GetAnswer();
+        List<string> GetAnswers();
     }
 
     [DataContract]

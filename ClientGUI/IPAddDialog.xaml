@@ -18,7 +18,7 @@
             <TextBox x:Name="txtPortNum" Width="100" Margin="10,0,0,0" HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <Button x:Name="btnConfirm" Content="Confirm" Margin="70,20,70,0" FontFamily="Tw Cen MT" Click="btnConfirm_Click"/>
+        <Button  Style="{DynamicResource RoundedButtonStyle}" x:Name="btnConfirm" Content="Confirm" Margin="70,20,70,0" FontFamily="Tw Cen MT" Click="btnConfirm_Click"/>
 
     </StackPanel>
       

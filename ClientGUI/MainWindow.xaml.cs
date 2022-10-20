@@ -42,7 +42,6 @@ namespace ClientGUI
             //Add Client
             client = AddClient(ipadd, portNum);
 
-            CreateVirtualIP();
             StartServerThread();
             StartNetworkingThread();
         }
@@ -69,11 +68,6 @@ namespace ClientGUI
 
             txtIP.Text = "Local Endpoint: " + url;
             return url;
-        }
-
-        private void CreateVirtualIP()
-        {
-            
         }
 
         private Client AddClient(string ipAdd, string portNum)
@@ -125,22 +119,6 @@ namespace ClientGUI
             List<Client> clients = JsonConvert.DeserializeObject<List<Client>>(restResponse.Content);
 
             return clients;
-        }
-
-        //TODO: This can be removed? yes
-        private string GetIPAdd()
-        {
-            IPAddress[] hostAddresses = Dns.GetHostAddresses("");
-            string ipAdd ="";
-            foreach (IPAddress hostAddress in hostAddresses)
-            {
-                if (hostAddress.AddressFamily == AddressFamily.InterNetwork &&
-                    !IPAddress.IsLoopback(hostAddress) &&  // ignore loopback addresses
-                    !hostAddress.ToString().StartsWith("169.254."))  // ignore link-local addresses
-                    ipAdd = hostAddress.ToString();
-            }
-            //txtIP.Text = ipAdd;
-            return ipAdd;
         }
 
         private void btnBrowseFile_Click(object sender, RoutedEventArgs e)
@@ -213,6 +191,18 @@ namespace ClientGUI
                 Random rand = new Random();
                 clients = clients.OrderBy(_ => rand.Next()).ToList();
 
+                //check answer
+                if (foob != null)
+                {
+                    Console.WriteLine(ipadd);
+                    List<string> test = foob.GetAnswers();
+                    foreach (string answer in test)
+                    {
+                        Console.WriteLine(ipadd + answer);
+                        result.Report(answer);
+                    }
+                }
+
                 //loop through each client
                 foreach (Client client in clients)
                 {
@@ -235,6 +225,7 @@ namespace ClientGUI
                                 {
                                     progress.Report(true);
                                     Job job = remoteFoob.Download(); // download job
+                                    remoteFoob.Remove(job);
 
                                     using (SHA256 sha256Hash = SHA256.Create())
                                     {
@@ -249,14 +240,18 @@ namespace ClientGUI
                                             byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
                                             string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
+                                            //sleep for 1 sec
+                                            Thread.Sleep(1000);
+
                                             //execute job and update GUI
                                             string txtResult = ExecuteJob(jobString); // execute job
                                             EditClient();
                                             progress.Report(false);
 
+
                                             //post back job and remove job
-                                            foob.PostAnswer(txtResult);
-                                            remoteFoob.Remove(job);
+                                            remoteFoob.PostAnswer(txtResult);
+                                            //remoteFoob.Remove(job);
 
                                         }
                                     }
@@ -267,14 +262,6 @@ namespace ClientGUI
                     }
 
                 }
-                //constantly get answer if available
-                string getResult = foob.GetAnswer();
-
-                if (getResult != "" || getResult!= null)
-                {
-                    result.Report(getResult);
-                }
-                
 
                 Thread.Sleep(2000);
             }

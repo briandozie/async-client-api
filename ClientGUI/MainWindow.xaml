@@ -28,7 +28,7 @@
             <ProgressBar x:Name="progBar" Height="27" Width="388" Foreground="#FFF1E59E" Background="#FF758A75" BorderBrush="White"/>
             <TextBlock x:Name="txtStatus" Text="Searching Job..." HorizontalAlignment="Center" FontFamily="Tw Cen MT"/>
             <TextBlock Text="Result: " HorizontalAlignment="Center" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Width="450" FontFamily="Tw Cen MT" />
-            <TextBox Style="{DynamicResource TextBoxStyle}" x:Name="txtResult" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="60"/>
+            <TextBox Style="{DynamicResource TextBoxStyle}" x:Name="txtResult" HorizontalAlignment="Center" VerticalAlignment="Center" Width="450" Height="60" IsReadOnly="True"/>
 
         </StackPanel>
 

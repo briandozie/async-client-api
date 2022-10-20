@@ -13,10 +13,11 @@ namespace RemoteServer
     public class RemoteServerImpl : RemoteServerInterface
     {
         private List<Job> jobs;
-        private string result = "";
+        private List<string> results;
 
         public RemoteServerImpl()
         {
+            results = new List<string>();
             jobs = new List<Job>();
         }
 
@@ -66,12 +67,12 @@ namespace RemoteServer
 
         public void PostAnswer (string result)
         {
-            this.result = result;
+            results.Add(result);
         }
 
-        public string GetAnswer()
+        public List<string> GetAnswers()
         {
-            return result;
+            return results;
         }
 
         private bool CompareByteArray(byte[] arr1, byte[] arr2)
