@@ -251,7 +251,7 @@ namespace ClientGUI
                                         progress.Report(false);
 
                                         //post back job and remove job
-                                        result.Report(txtResult);
+                                        foob.PostAnswer(txtResult);
                                         remoteFoob.Remove();
                                         
                                     }
@@ -260,6 +260,14 @@ namespace ClientGUI
                         }
                     }
                 }
+                //constantly get answer if available
+                string getResult = foob.GetAnswer();
+
+                if (getResult != "" || getResult!= null)
+                {
+                    result.Report(getResult);
+                }
+                
 
                 Thread.Sleep(2000);
             }

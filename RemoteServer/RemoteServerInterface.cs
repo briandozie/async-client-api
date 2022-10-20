@@ -26,6 +26,14 @@ namespace RemoteServer
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
         bool JobAvailable();
+
+        [OperationContract]
+        [FaultContract(typeof(ServerFault))]
+        void PostAnswer(string answer);
+
+        [OperationContract]
+        [FaultContract(typeof(ServerFault))]
+        string GetAnswer();
     }
 
     [DataContract]
