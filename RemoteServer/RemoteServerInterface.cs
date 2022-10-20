@@ -17,7 +17,7 @@ namespace RemoteServer
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]
-        void Remove();
+        void Remove(Job job);
 
         [OperationContract]
         [FaultContract(typeof(ServerFault))]

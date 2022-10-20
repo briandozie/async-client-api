@@ -29,6 +29,7 @@ namespace ClientGUI
         private int id;
         private RemoteServerInterface foob;
         private Client client, jobPoster;
+        ServiceHost host;
 
         public MainWindow()
         {
@@ -48,6 +49,7 @@ namespace ClientGUI
 
         void MainWindow_Closed(object sender, EventArgs e)
         {
+            host.Close();
             RemoveClient();
         }
 
@@ -220,46 +222,49 @@ namespace ClientGUI
                     {
                         // connect to the client's remote server
                         RemoteServerInterface remoteFoob = ConnectToRemoteServer(client.IPAddress, client.PortNumber);
-                        
-                        // check for available jobs
-                        if(remoteFoob.JobAvailable())
+
+                        try
                         {
-
-                            bool success = false;
-
-                            while (!success)
+                            // check for available jobs
+                            if (remoteFoob.JobAvailable())
                             {
-                                progress.Report(true);
-                                Job job = remoteFoob.Download(); // download job
 
-                                using (SHA256 sha256Hash = SHA256.Create())
+                                bool success = false;
+
+                                while (!success)
                                 {
-                                    byte[] hash = sha256Hash.ComputeHash(
-                                        System.Text.Encoding.UTF8.GetBytes(job.encodedJob));
+                                    progress.Report(true);
+                                    Job job = remoteFoob.Download(); // download job
 
-                                    if (CompareByteArray(hash, job.hash))
+                                    using (SHA256 sha256Hash = SHA256.Create())
                                     {
-                                        success = true;
+                                        byte[] hash = sha256Hash.ComputeHash(
+                                            System.Text.Encoding.UTF8.GetBytes(job.encodedJob));
 
-                                        // decode job
-                                        byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
-                                        string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
+                                        if (CompareByteArray(hash, job.hash))
+                                        {
+                                            success = true;
 
-                                        //execute job and update GUI
-                                        string txtResult = ExecuteJob(jobString); // execute job
-                                        EditClient();
-                                        progress.Report(false);
+                                            // decode job
+                                            byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
+                                            string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
-                                        //post back job and remove job
-                                        foob.PostAnswer(txtResult);
-                                        remoteFoob.Remove();
+                                            //execute job and update GUI
+                                            string txtResult = ExecuteJob(jobString); // execute job
+                                            EditClient();
+                                            progress.Report(false);
+
+                                            //post back job and remove job
+                                            foob.PostAnswer(txtResult);
+                                            remoteFoob.Remove();
                                         
                                     }
                                 }
                             }
                         }
                     }
-                }
+                        catch (EndpointNotFoundException) { }
+                    }
                 //constantly get answer if available
                 string getResult = foob.GetAnswer();
 
@@ -321,7 +326,6 @@ namespace ClientGUI
 
         private void InitializeServer()
         {
-            ServiceHost host;
             NetTcpBinding tcp = new NetTcpBinding();
             RemoteServerImpl jobServer = new RemoteServerImpl();
 
@@ -341,10 +345,6 @@ namespace ClientGUI
                 foobFactory = new ChannelFactory<RemoteServerInterface>(tcp, URL);
                 foob = foobFactory.CreateChannel();
             }
-            
-
-            //Console.ReadLine();
-            //host.Close();
         }
 
         private bool CompareByteArray(byte[] arr1, byte[] arr2)

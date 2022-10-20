@@ -27,9 +27,9 @@ namespace RemoteServer
             return job;
         }
 
-        public void Remove()
+        public void Remove(Job job)
         {
-            jobs.RemoveAt(0);
+            jobs.RemoveAll(x => x.encodedJob.Equals(job.encodedJob));
         }
 
         public bool Upload(Job job)
