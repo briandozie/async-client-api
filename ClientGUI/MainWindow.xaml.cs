@@ -221,7 +221,7 @@ namespace ClientGUI
                        !client.PortNumber.Equals(portNum))
                     {
                         // connect to the client's remote server
-                        RemoteServerInterface remoteFoob = connectToRemoteServer(client.IPAddress, client.PortNumber);
+                        RemoteServerInterface remoteFoob = ConnectToRemoteServer(client.IPAddress, client.PortNumber);
 
                         try
                         {
@@ -256,7 +256,7 @@ namespace ClientGUI
 
                                             //post back job and remove job
                                             result.Report(txtResult);
-                                            remoteFoob.Remove();
+                                            remoteFoob.Remove(job);
                                         }
                                     }
                                 }

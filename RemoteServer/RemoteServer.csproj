@@ -48,7 +48,6 @@
     <Compile Include="Job.cs" />
     <Compile Include="RemoteServerImpl.cs" />
     <Compile Include="RemoteServerInterface.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
