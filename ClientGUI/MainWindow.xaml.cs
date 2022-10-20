@@ -52,6 +52,7 @@ namespace ClientGUI
             RemoveClient();
         }
 
+        //Open IP Address Dialog and Get Info
         public string GetURL()
         {
             IPAddDialog dialog = new IPAddDialog();
@@ -194,13 +195,15 @@ namespace ClientGUI
                 //check answer
                 if (foob != null)
                 {
-                    Console.WriteLine(ipadd);
-                    List<string> test = foob.GetAnswers();
-                    foreach (string answer in test)
+                    try
                     {
-                        Console.WriteLine(ipadd + answer);
-                        result.Report(answer);
-                    }
+                        List<string> test = foob.GetAnswers();
+                        foreach (string answer in test)
+                        {
+                            result.Report(answer);
+                        }
+                    }catch (FaultException) { }
+                   
                 }
 
                 //loop through each client
@@ -225,12 +228,12 @@ namespace ClientGUI
                                 {
                                     progress.Report(true);
                                     Job job = remoteFoob.Download(); // download job
-                                    remoteFoob.Remove(job);
+                                    remoteFoob.Remove(job); //remove job after download
 
                                     using (SHA256 sha256Hash = SHA256.Create())
                                     {
                                         byte[] hash = sha256Hash.ComputeHash(
-                                            System.Text.Encoding.UTF8.GetBytes(job.encodedJob));
+                                         System.Text.Encoding.UTF8.GetBytes(job.encodedJob));
 
                                         if (CompareByteArray(hash, job.hash))
                                         {
@@ -247,7 +250,6 @@ namespace ClientGUI
                                             string txtResult = ExecuteJob(jobString); // execute job
                                             EditClient();
                                             progress.Report(false);
-
 
                                             //post back job and remove job
                                             remoteFoob.PostAnswer(txtResult);
