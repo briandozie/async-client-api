@@ -217,7 +217,7 @@ namespace ClientGUI
                 foreach (Client client in clients)
                 {
                     // for each client that is not itself
-                    if(!client.IPAddress.Equals(ipadd) &&
+                    if (!client.IPAddress.Equals(ipadd) &&
                        !client.PortNumber.Equals(portNum))
                     {
                         // connect to the client's remote server
@@ -256,15 +256,17 @@ namespace ClientGUI
 
                                             //post back job and remove job
                                             foob.PostAnswer(txtResult);
-                                            remoteFoob.Remove();
-                                        
+                                            remoteFoob.Remove(job);
+
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
                         catch (EndpointNotFoundException) { }
                     }
+
+                }
                 //constantly get answer if available
                 string getResult = foob.GetAnswer();
 
