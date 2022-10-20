@@ -6,30 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using RestSharp;
 using Newtonsoft.Json;
-using IronPython;
 using WebServer.Models;
 using RemoteServer;
 using System.ServiceModel;
 using System.Net.Sockets;
 using System.Net;
-using System.Security.Policy;
 using Microsoft.Scripting.Hosting;
 using IronPython.Hosting;
 using System.Threading;
-using System.Buffers.Text;
 using System.Security.Cryptography;
-using static Community.CsharpSqlite.Sqlite3;
-using System.ComponentModel;
 
 namespace ClientGUI
 {
@@ -50,10 +37,10 @@ namespace ClientGUI
             this.Closed += new EventHandler(MainWindow_Closed);
 
             //get IP Address and Port Number
-            string URL = getURL();
+            string URL = GetURL();
 
             //Add Client
-            client = addClient(ipadd, portNum);
+            client = AddClient(ipadd, portNum);
 
             CreateVirtualIP();
             StartServerThread();
@@ -63,15 +50,15 @@ namespace ClientGUI
         void MainWindow_Closed(object sender, EventArgs e)
         {
             host.Close();
-            removeClient();
+            RemoveClient();
         }
 
-        public string getURL()
+        public string GetURL()
         {
             IPAddDialog dialog = new IPAddDialog();
             ipadd = "";
             portNum = "";
-            string url = "";
+            string url;
             if (dialog.ShowDialog() == true)
             {
                 ipadd = dialog.IPAddress;
@@ -80,7 +67,7 @@ namespace ClientGUI
 
             url = "net.tcp://" + ipadd + ":" + portNum + "/JobService";
 
-            txtIP.Text = url;
+            txtIP.Text = "Local Endpoint: " + url;
             return url;
         }
 
@@ -89,7 +76,7 @@ namespace ClientGUI
             
         }
 
-        private Client addClient(string ipAdd, string portNum)
+        private Client AddClient(string ipAdd, string portNum)
         {
             Client client = new Client();
             client.IPAddress = ipAdd;
@@ -106,7 +93,7 @@ namespace ClientGUI
             return returnClient;
         }
 
-        private void removeClient()
+        private void RemoveClient()
         {
             RestClient client = new RestClient("http://localhost:50968/");
             RestRequest request = new RestRequest("api/clients/{id}", Method.Delete);
@@ -114,7 +101,7 @@ namespace ClientGUI
             client.Execute(request);
         }
 
-        private void editClient()
+        private void EditClient()
         {
             Client newClient = new Client();
             newClient.Id = client.Id;
@@ -130,7 +117,7 @@ namespace ClientGUI
             RestResponse restResponse = restClient.Execute(restRequest);
 
         }
-        private List<Client> getClients()
+        private List<Client> GetClients()
         {
             RestClient restClient = new RestClient("http://localhost:50968/");
             RestRequest restRequest = new RestRequest("api/clients", Method.Get);
@@ -141,7 +128,7 @@ namespace ClientGUI
         }
 
         //TODO: This can be removed?
-        private string getIPAdd()
+        private string GetIPAdd()
         {
             IPAddress[] hostAddresses = Dns.GetHostAddresses("");
             string ipAdd ="";
@@ -174,7 +161,7 @@ namespace ClientGUI
 
             Job job = new Job();
             job.encodedJob = encodedJob;
-            
+           
             // create a hash
             using (SHA256 sha256Hash = SHA256.Create())
             {
@@ -220,9 +207,14 @@ namespace ClientGUI
             while(true)
             {
                 // look for new clients
-                List<Client> clients = getClients();
+                List<Client> clients = GetClients();
 
-                foreach(Client client in clients)
+                //shuffle client list
+                Random rand = new Random();
+                clients = clients.OrderBy(_ => rand.Next()).ToList();
+
+                //loop through each client
+                foreach (Client client in clients)
                 {
                     // for each client that is not itself
                     if(!client.IPAddress.Equals(ipadd) &&
@@ -257,24 +249,25 @@ namespace ClientGUI
                                             byte[] encodedBytes = Convert.FromBase64String(job.encodedJob);
                                             string jobString = System.Text.Encoding.UTF8.GetString(encodedBytes);
 
-                                            result.Report(ExecuteJob(jobString)); // execute job
-                                            editClient();
+                                            //execute job and update GUI
+                                            string txtResult = ExecuteJob(jobString); // execute job
+                                            EditClient();
                                             progress.Report(false);
+
+                                            //post back job and remove job
+                                            result.Report(txtResult);
+                                            remoteFoob.Remove();
                                         }
                                     }
                                 }
                             }
-                        }
-                        catch(EndpointNotFoundException) { }
-                        
+                        } catch (EndpointNotFoundException) { }
                     }
                 }
 
                 Thread.Sleep(2000);
             }
         }
-
-
 
         private string ExecuteJob(string job)
         {
@@ -293,12 +286,10 @@ namespace ClientGUI
             
         }
 
-        private RemoteServerInterface connectToRemoteServer(string ip, string port)
+        private RemoteServerInterface ConnectToRemoteServer(string ip, string port)
         {
             RemoteServerInterface remoteFoob;
-
-
-
+ 
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
                 socket.Connect(ip, Int32.Parse(port));

@@ -22,8 +22,13 @@ namespace RemoteServer
         public Job Download()
         {
             Job job = jobs[0];
-            jobs.RemoveAt(0);
+            
             return job;
+        }
+
+        public void Remove()
+        {
+            jobs.RemoveAt(0);
         }
 
         public bool Upload(Job job)
